@@ -1,0 +1,66 @@
+version: '3'
+services:
+
+  #PHP Service
+  app:
+    build:
+      context: ./php-fpm
+      dockerfile: Dockerfile
+    image: jamal008/laravel:php73-alpine
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    environment:
+      NAME_REPO: monitoring
+      SSH_PORT: 57713
+      SSH_PASSWORD: testtest
+    working_dir: /var/www
+    ports:
+      - "57713:57713" # adjust the environment port ssh
+    volumes:
+      - ./webroot:/var/www
+      - ./php-fpm/conf/local.ini:/usr/local/etc/php/php.ini
+    networks:
+      - app-network
+
+  #Nginx Service
+  webserver:
+    image: nginx:1.17.10-alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./webroot:/var/www
+      - ./nginx/conf/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  #MySQL Service
+  db:
+    image: mariadb:10.3
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: wp
+      MYSQL_ROOT_PASSWORD: testtest
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./dbdata:/var/lib/mysql/
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+#Volumes
+volumes:
+  dbdata:
+    driver: local
