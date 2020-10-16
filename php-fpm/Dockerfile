@@ -33,6 +33,8 @@ RUN set -ex; \
 		exif \
 		gd \
 		mysqli \
+		pdo \
+		pdo_mysql \
 		zip \
 	; \
 	pecl install imagick-3.4.4; \
@@ -87,6 +89,9 @@ RUN apk add --no-cache --virtual .build-deps \
     openssh \
     tzdata \
     supervisor;
+
+# Install Composer PHP
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Custom user for application
 RUN apk --no-cache add shadow && \
